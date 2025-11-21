@@ -169,10 +169,10 @@ class AppLagosPark(tk.Tk):
         self.entry_cantidad = ttk.Entry(frame_consulta, width=10)
         self.entry_cantidad.grid(row=0, column=1, padx=5, pady=5)
 
-        ttk.Label(frame_consulta, text="Fecha (AAAA-MM-DD):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5) #VERIFICAR: CAMBIAR A FECHA LATAM.
+        ttk.Label(frame_consulta, text="Fecha (DD-MM-AAAA):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5) #VERIFICAR: CAMBIAR A FECHA LATAM.
         self.entry_fecha = ttk.Entry(frame_consulta, width=15)
         self.entry_fecha.grid(row=1, column=1, padx=5, pady=5)
-        self.entry_fecha.insert(0, "2025-12-15") # Fecha de ejemplo
+        self.entry_fecha.insert(0, "") # Fecha de ejemplo
 
         self.btn_verificar = ttk.Button(frame_consulta, text="Verificar Disponibilidad", command=self.on_verificar_disponibilidad)
         self.btn_verificar.grid(row=2, column=0, columnspan=2, pady=10, sticky=tk.EW)
@@ -388,9 +388,12 @@ class AppLagosPark(tk.Tk):
             dni_resp = self.entry_dni.get()
             nombre_resp = self.entry_nombre.get()
             apellido_resp = self.entry_apellido.get()
-            email_resp = self.entry_email.get()
+            email_resp1 = self.entry_email.get()
             edad_resp = int(self.entry_edad_resp.get()) #VERIFICAR: CAMBIAR POR FECHA DE NACIMIENTO.
             sabe_nadar_resp = "Si" if self.var_sabe_nadar_resp.get() else "No"
+            
+            horarioActual = time.localtime()
+            fecha_actual = time.strftime("%d/%m/%Y", horarioActual)
             
             if not all([dni_resp, nombre_resp, apellido_resp]): #Comprueba que los datos se ingresen.
                 messagebox.showerror("Datos Incompletos", "Por favor, complete todos los datos del responsable.")
@@ -400,9 +403,22 @@ class AppLagosPark(tk.Tk):
                 messagebox.showerror("El mail debe ser valido.")
                 return
 
-            if edad_resp < 18: #Comprueba que sea mayor de edad. #VERIFICAR: MODIFICAR POR FECHA DE NACIMIENTO.
+            fecact= fecha_actual.split("/")
+            for i in range(3):
+                edad_resp[i]=int(edad_resp[i])
+                fecact[i]=int(fecact[i])
+            b=0
+            if edad_resp[2]>fecact[2]-18:
+                b=1
+            elif edad_resp[1]>fecact[1] and edad_resp[2]==fecact[2]-18:
+                b=1
+            elif edad_resp[0]>fecact[0] and edad_resp[2]==fecact[2]-18 and edad_resp[1]==fecact[1]:
+                b=1
+
+            if b==1: #Comprueba que sea mayor de edad. #VERIFICAR: MODIFICAR POR FECHA DE NACIMIENTO.
                 messagebox.showerror("Regla de Negocio", "El adulto responsable debe ser mayor de 18 años.")
                 return
+            edad_resp= self.entry_edad_resp.get()
 
             # C. Datos Acompañantes VERIFICAR FUNCIONAMIENTO, HACERLO MAS SIMPLE.
             lista_asistentes = []
